@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Evaluación de Equipos Médicos</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8fafc;
+      padding: 20px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    label {
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #004d7a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #003653;
+    }
+  </style>
+</head>
+<body>
+  <h2>Evaluación para Reasignación de Equipo Médico</h2>
+
+  <form id="formulario">
+    <label>Nombre del equipo</label>
+    <input type="text" id="nombre" required>
+
+    <label>Modelo</label>
+    <input type="text" id="modelo">
+
+    <label>Marca</label>
+    <input type="text" id="marca">
+
+    <label>Número de serie</label>
+    <input type="text" id="serie">
+
+    <label>Ubicación actual</label>
+    <input type="text" id="ubicacion">
+
+    <label>Institución Receptora</label>
+    <input type="text" id="destino" placeholder="Ej. Universidad Autónoma de...">
+
+    <label>Funcionalidad (1-5)</label>
+    <select id="funcionalidad">
+      <option value="1">1 - <20%</option>
+      <option value="2">2 - 21–50%</option>
+      <option value="3">3 - 51–80%</option>
+      <option value="4">4 - 81–95%</option>
+      <option value="5">5 - 96–100%</option>
+    </select>
+
+    <label>Seguridad</label>
+    <select id="seguridad">
+      <option value="1">1 - Falla crítica</option>
+      <option value="3">3 - Cumple parcialmente</option>
+      <option value="5">5 - Cumple todo</option>
+    </select>
+
+    <label>Obsolescencia</label>
+    <select id="obsolescencia">
+      <option value="1">1 - >15 años sin soporte</option>
+      <option value="3">3 - 8–15 años</option>
+      <option value="5">5 - <5 años con soporte</option>
+    </select>
+
+    <label>Mantenimiento</label>
+    <select id="mantenimiento">
+      <option value="1">1 - Sin historial ni repuestos</option>
+      <option value="3">3 - Parcial</option>
+      <option value="5">5 - Completos</option>
+    </select>
+
+    <label>Riesgo Clínico</label>
+    <select id="riesgo">
+      <option value="1">1 - Invasivo</option>
+      <option value="3">3 - Semi-crítico</option>
+      <option value="5">5 - No invasivo</option>
+    </select>
+
+    <label>Observaciones</label>
+    <textarea id="observaciones" placeholder="Recomendaciones adicionales..."></textarea>
+
+    <button type="button" onclick="generarPDF()">Generar Ficha Técnica en PDF</button>
+  </form>
+
+  <script>
+    async function generarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const nombre = document.getElementById("nombre").value;
+      const modelo = document.getElementById("modelo").value;
+      const marca = document.getElementById("marca").value;
+      const serie = document.getElementById("serie").value;
+      const ubicacion = document.getElementById("ubicacion").value;
+      const destino = document.getElementById("destino").value;
+      const f = parseInt(document.getElementById("funcionalidad").value);
+      const s = parseInt(document.getElementById("seguridad").value);
+      const o = parseInt(document.getElementById("obsolescencia").value);
+      const m = parseInt(document.getElementById("mantenimiento").value);
+      const r = parseInt(document.getElementById("riesgo").value);
+      const obs = document.getElementById("observaciones").value;
+
+      const fecha = new Date().toLocaleDateString();
+
+      const ive = ((f * 0.30 + s * 0.25 + o * 0.15 + m * 0.20 + r * 0.10) * 20).toFixed(2);
+
+      doc.setFontSize(14);
+      doc.text("Ficha Técnica de Evaluación para Reasignación de Equipo Médico", 10, 15);
+      doc.setFontSize(10);
+      doc.text(`Fecha: ${fecha}`, 150, 25);
+
+      doc.text("DATOS DEL EQUIPO", 10, 25);
+      doc.text(`Nombre: ${nombre}`, 10, 30);
+      doc.text(`Modelo: ${modelo}`, 10, 35);
+      doc.text(`Marca: ${marca}`, 10, 40);
+      doc.text(`Serie: ${serie}`, 10, 45);
+      doc.text(`Ubicación Actual: ${ubicacion}`, 10, 50);
+      doc.text(`Institución Receptora: ${destino}`, 10, 55);
+
+      doc.text("RESULTADO DE EVALUACIÓN", 10, 65);
+      doc.text(`Funcionalidad: ${f} / 5`, 10, 70);
+      doc.text(`Seguridad: ${s} / 5`, 10, 75);
+      doc.text(`Obsolescencia: ${o} / 5`, 10, 80);
+      doc.text(`Mantenimiento: ${m} / 5`, 10, 85);
+      doc.text(`Riesgo Clínico: ${r} / 5`, 10, 90);
+      doc.setFontSize(11);
+      doc.text(`Índice de Viabilidad Educativa (IVE): ${ive} / 100`, 10, 100);
+
+      doc.setFontSize(10);
+      doc.text("OBSERVACIONES", 10, 110);
+      doc.text(doc.splitTextToSize(obs, 180), 10, 115);
+
+      doc.text("FIRMAS Y VALIDACIÓN", 10, 140);
+      doc.text("_________________________", 10, 150);
+      doc.text("Responsable Técnico", 10, 155);
+      doc.text("_________________________", 70, 150);
+      doc.text("Autorización Dirección", 70, 155);
+      doc.text("_________________________", 140, 150);
+      doc.text("Recepción Universidad", 140, 155);
+
+      doc.save(`Ficha_${nombre}.pdf`);
+    }
+  </script>
+</body>
+</html>
